@@ -1,53 +1,46 @@
 const express = require('express');
+const Event = require('../models/Event');
+const User = require('../models/User');
+const authMiddleware = require('../middleware/authMiddleware');
+
 const router = express.Router();
-const Event = require('../models/Event');  // Assuming Event model is in models/Event.js
-const User = require('../models/User');    // Assuming User model is in models/User.js
 
-// POST /rsvp - RSVP for an event
-router.post('/:eventId/rsvp', async (req, res) => {
+// RSVP: POST /api/events/:eventId/rsvp
+router.post('/:eventId/rsvp', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.body; // Assuming userId is in the request body
-    const event = await Event.findById(req.params.eventId); // Find the event by ID
-    const user = await User.findById(userId); // Find the user by ID
+    const userId = req.user.id;
+    const eventId = req.params.eventId;
 
-    if (!event || !user) {
-      return res.status(404).json({ message: 'Event or User not found' });
-    }
+    const [event, user] = await Promise.all([
+      Event.findById(eventId),
+      User.findById(userId)
+    ]);
+    if (!event || !user) return res.status(404).json({ message: 'Event or user not found' });
 
-    // Check if user is already RSVP'd to this event
     if (event.rsvps.includes(userId)) {
-      return res.status(400).json({ message: 'You have already RSVP\'d to this event' });
+      return res.status(400).json({ message: 'Already enrolled' });
     }
 
-    // Add userId to the event's RSVP list
     event.rsvps.push(userId);
-    await event.save(); // Save the updated event
+    user.events.push(eventId);
 
-    // Optionally, you can also save the event in the user's profile
-    user.events.push(event._id);  // Link event to the user's profile
-    await user.save(); // Save the updated user
-
-    res.status(200).json({ message: 'RSVP successful!' }); // Send success response
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' }); // Handle any errors
+    await Promise.all([event.save(), user.save()]);
+    return res.status(200).json({ message: 'RSVP successful' });
+  } catch (err) {
+    console.error('RSVP error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
-// GET /events/:eventId/rsvps - Get all RSVPs for an event
-router.get('/:eventId/rsvps', async (req, res) => {
+// Get RSVPs for event: GET /api/events/:eventId/rsvps
+router.get('/:eventId/rsvps', authMiddleware, async (req, res) => {
   try {
-    const event = await Event.findById(req.params.eventId).populate('rsvps', 'name email'); // Populate rsvps with user data
-
-    if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
-    }
-
-    // Send the list of RSVPs for the event
-    res.status(200).json({ rsvps: event.rsvps });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    const event = await Event.findById(req.params.eventId).populate('rsvps', 'name email');
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+    return res.status(200).json({ rsvps: event.rsvps });
+  } catch (err) {
+    console.error('Get rsvps err:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 

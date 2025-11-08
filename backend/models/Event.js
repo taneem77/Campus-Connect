@@ -5,9 +5,8 @@ const eventSchema = new mongoose.Schema({
   description: { type: String },
   date: { type: Date, required: true },
   location: { type: String },
-  rsvps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]  // User references for RSVP
-});
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // admin who created
+  rsvps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+}, { timestamps: true });
 
-const Event = mongoose.model('Event', eventSchema);
-
-module.exports = Event;
+module.exports = mongoose.model('Event', eventSchema);
