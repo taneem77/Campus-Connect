@@ -1,0 +1,581 @@
+/* ================================
+   CAMPUS CONNECT — DARK NEON THEME
+   ================================ */
+
+:root {
+  --bg-dark: #0b0b15;
+  --bg-gradient: radial-gradient(circle at 20% 20%, #0e0e22 0%, #090914 100%);
+  --card-bg: rgba(255, 255, 255, 0.07);
+  --primary: #a855f7;
+  --accent: #22d3ee;
+  --text: #f3f3f3;
+  --muted: #9ca3af;
+  --radius: 1.2rem;
+  --glow-purple: 0 0 15px rgba(168, 85, 247, 0.7);
+  --glow-cyan: 0 0 15px rgba(34, 211, 238, 0.7);
+  --transition-fast: 0.25s ease;
+  --transition-slow: 0.5s ease;
+  --font-display: "Poppins", "Segoe UI", sans-serif;
+}
+
+/* ================= GLOBAL ================= */
+body {
+  margin: 0;
+  font-family: var(--font-display);
+  background: var(--bg-gradient);
+  color: var(--text);
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+main {
+  margin-top: 100px;
+  padding: 2rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* ================= NAVBAR ================= */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(15, 15, 30, 0.7);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.3);
+  color: white;
+  box-sizing: border-box;
+}
+
+.navbar-left h2 {
+  font-weight: 800;
+  font-size: 1.4rem;
+  background: linear-gradient(90deg, #22d3ee, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+  cursor: pointer;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.navbar-links button {
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.navbar-links button:hover {
+  color: #22d3ee;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ✅ Restored logout button */
+.logout-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ================= AUTH (Login/Signup) ================= */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform var(--transition-slow), box-shadow var(--transition-slow);
+  max-width: 420px;
+  margin: 4rem auto;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.25);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+
+.auth-tabs button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 0.5rem 1.4rem;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.auth-tabs button.active,
+.auth-tabs button:hover {
+  color: var(--text);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  box-shadow: var(--glow-purple), var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+}
+
+.message {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+/* ================= BUTTONS ================= */
+.btn-primary {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.5),
+              0 0 25px rgba(34, 211, 238, 0.5);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: var(--accent);
+  color: #0b0b15;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+/* ================= HOME DASHBOARD ================= */
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.home-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+}
+
+.home-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.25);
+}
+
+/* ================= EVENTS ================= */
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.8rem;
+  justify-items: center;
+  margin-top: 3rem;
+}
+
+.event-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 360px;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.25),
+              0 0 40px rgba(34, 211, 238, 0.25);
+}
+
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ================= RSVP / ENROLL ================= */
+.rsvp-dropdown {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease;
+}
+
+.rsvp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.rsvp-list li {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* ================= EFFECTS ================= */
+.fade-in {
+  animation: fadeIn 0.6s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary), var(--accent));
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  main {
+    padding: 1.5rem;
+    margin-top: 90px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .logout-btn {
+    padding: 0.5rem 1rem;
+  }
+}
+/* ===== BIG SUMMARY CARD ===== */
+.summary-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 1.2rem;
+  padding: 2.5rem 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.summary-card h2 {
+  font-size: 1.7rem;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.6rem;
+}
+
+.summary-card p {
+  color: var(--muted);
+  margin-bottom: 1.6rem;
+}
+
+.summary-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.summary-stats div {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.2rem 2rem;
+  min-width: 180px;
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-stats div:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+}
+
+.summary-stats h3 {
+  font-size: 1.6rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.summary-stats p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0.4rem 0 0;
+}
+/* ===================== */
+/* FIXED TEXTAREA STYLING */
+/* ===================== */
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.9rem 1.2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: var(--font-display);
+  resize: vertical;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+/* 🔹 On focus: glow effect */
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3),
+              0 0 20px rgba(168, 85, 247, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 🔹 Placeholder styling */
+textarea::placeholder {
+  color: rgba(243, 243, 243, 0.6);
+  font-style: italic;
+}
+
+/* 🔹 For smaller screens */
+@media (max-width: 768px) {
+  textarea {
+    font-size: 0.9rem;
+    padding: 0.8rem 1rem;
+  }
+}
+/* ===================== */
+/* EVENT FORM (ADMIN) — FIXED LAYOUT */
+/* ===================== */
+
+.event-form {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 1.2rem;
+  padding: 2rem 2.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.8rem;
+}
+
+/* ========== FORM STRUCTURE ========== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1.8rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.form-group.half {
+  flex: 1 1 48%;
+  min-width: 260px;
+}
+
+/* ========== INPUT & TEXTAREA ========== */
+.event-form input,
+.event-form textarea {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  font-family: var(--font-display);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.event-form input:focus,
+.event-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3),
+              0 0 20px rgba(168, 85, 247, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.event-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* ========== BUTTON ========== */
+.form-submit {
+  display: block;
+  margin: 1.8rem auto 0;
+  width: 100%;
+  max-width: 240px;
+  text-align: center;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+.form-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.5);
+}
+
+/* ========== RESPONSIVE FIXES ========== */
+@media (max-width: 900px) {
+  .form-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-group.half {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .event-form {
+    padding: 1.6rem;
+  }
+}
+
