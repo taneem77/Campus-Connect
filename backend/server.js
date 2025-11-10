@@ -1,5 +1,4 @@
-// ===== Unified Backend: Auth + Events + RSVP =====
-
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -8,224 +7,229 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 dotenv.config();
+
 const app = express();
-app.use(cors());
+
+// -- Middlewares
+app.use(
+  cors({
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-// ====== MongoDB Connection ======
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch(err => console.log("❌ MongoDB Error:", err));
+// -- Helpful mongoose options & connect
+mongoose.set("strictQuery", true);
 
-// ====== MODELS ======
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/campus-connect";
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log(`✅ MongoDB connected to ${MONGO_URI}`))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  });
 
-// -- Auth Users (simple email-password login) --
-const AuthUserSchema = new mongoose.Schema({
-  email: { type: String, unique: true },
-  password: String
-});
-const AuthUser = mongoose.model("AuthUser", AuthUserSchema);
-
-// -- Campus Users (Pavi + Tedla’s models) --
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, required: true, enum: ["student", "admin"] },
-  events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }]
-});
+// ===== SCHEMAS =====
+const UserSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: function () { return this.role === "student" || this.role === "admin"; } },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ["student", "admin"], required: true },
+    events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
+  },
+  { timestamps: true }
+);
 const User = mongoose.model("User", UserSchema);
 
-const EventSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  date: { type: Date, required: true },
-  location: String,
-  rsvps: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
-});
+const EventSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: String,
+    date: Date,
+    location: String,
+    rsvps: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: true }
+);
 const Event = mongoose.model("Event", EventSchema);
 
-// =========================================
-// ===== AUTHENTICATION ROUTES (Login/Register)
-// =========================================
+// ===== HELPERS =====
+const safeJson = (res, status, payload) => res.status(status).json(payload);
 
-// Register (email + password)
-app.post("/api/register", async (req, res) => {
-  const { email, password } = req.body;
+// ===== AUTH =====
+
+// Signup
+app.post("/api/signup", async (req, res) => {
   try {
-    let user = await AuthUser.findOne({ email });
-    if (user) return res.status(400).json({ msg: "User already exists" });
+    const { name, email, password, role } = req.body;
+
+    // basic validation
+    if (!email || !password || !role) {
+      return safeJson(res, 400, { message: "Missing required fields: email, password, role" });
+    }
+    if (!["student", "admin"].includes(role)) {
+      return safeJson(res, 400, { message: "Invalid role. Must be 'student' or 'admin'." });
+    }
+
+    const existing = await User.findOne({ email }).exec();
+    if (existing) {
+      return safeJson(res, 409, { message: "User already exists with that email" });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
-    user = new AuthUser({ email, password: hashed });
-    await user.save();
+    const newUser = new User({ name: name || "", email, password: hashed, role });
+    await newUser.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ msg: "User registered", token });
+    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET || "devsecret", {
+      expiresIn: "1d",
+    });
+
+    return safeJson(res, 201, {
+      message: "Signup successful",
+      token,
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
+    });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    console.error("Signup error:", err);
+    // Duplicate key handling (unique email)
+    if (err.code === 11000) {
+      return safeJson(res, 409, { message: "Email already exists" });
+    }
+    return safeJson(res, 500, { message: "Signup failed", error: err.message });
   }
 });
 
-// Login (email + password)
+// Login
 app.post("/api/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const user = await AuthUser.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) return safeJson(res, 400, { message: "Missing email/password/role" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+    const user = await User.findOne({ email, role }).exec();
+    if (!user) return safeJson(res, 401, { message: "Invalid credentials (email/role mismatch)" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ msg: "Login successful", token });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return safeJson(res, 401, { message: "Invalid credentials (wrong password)" });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || "devsecret", {
+      expiresIn: "1d",
+    });
+
+    return safeJson(res, 200, {
+      message: "Login successful",
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    console.error("Login error:", err);
+    return safeJson(res, 500, { message: "Login failed", error: err.message });
   }
 });
 
-// Auth middleware
+// ===== AUTH MIDDLEWARE =====
 function auth(req, res, next) {
-  const token = req.header("x-auth-token");
-  if (!token) return res.status(401).json({ msg: "No token, auth denied" });
+  const token = req.header("x-auth-token") || req.header("authorization")?.replace("Bearer ", "");
+  if (!token) return safeJson(res, 401, { message: "No token provided" });
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id;
+    req.user = jwt.verify(token, process.env.JWT_SECRET || "devsecret");
     next();
-  } catch {
-    res.status(401).json({ msg: "Token invalid" });
+  } catch (err) {
+    console.error("Auth error:", err.message);
+    return safeJson(res, 401, { message: "Invalid token" });
   }
 }
 
-// Protected route
-app.get("/api/user", auth, async (req, res) => {
-  const user = await AuthUser.findById(req.user).select("-password");
-  res.json(user);
-});
+// ===== EVENTS =====
 
-// =========================================
-// ===== USER MANAGEMENT (Pavi + Tedla)
-// =========================================
-
-// User Signup (with role)
-app.post("/api/users/signup", async (req, res) => {
+// Admin: Create Event
+app.post("/api/events/create", auth, async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role)
-      return res.status(400).json({ message: "All fields required" });
+    if (req.user.role !== "admin") return safeJson(res, 403, { message: "Only admins can create events" });
 
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ message: "User already exists" });
-
-    const newUser = new User({ name, email, password, role });
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Signup failed", error: err.message });
-  }
-});
-
-// =========================================
-// ===== EVENT MANAGEMENT (Pavi)
-// =========================================
-
-// Admin Create Event
-app.post("/api/events/create", async (req, res) => {
-  try {
     const { title, description, date, location } = req.body;
+    if (!title) return safeJson(res, 400, { message: "Event title required" });
+
     const event = new Event({ title, description, date, location });
     await event.save();
-    res.status(201).json({ message: "Event created successfully", event });
+    return safeJson(res, 201, { message: "Event created", event });
   } catch (err) {
-    res.status(500).json({ message: "Error creating event", error: err.message });
+    console.error("Create event error:", err);
+    return safeJson(res, 500, { message: "Create event failed", error: err.message });
   }
 });
 
-// Get All Events
+// Admin: Edit Event
+app.put("/api/events/:id", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") return safeJson(res, 403, { message: "Only admins can edit events" });
+    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true }).exec();
+    if (!updated) return safeJson(res, 404, { message: "Event not found" });
+    return safeJson(res, 200, { message: "Event updated", event: updated });
+  } catch (err) {
+    console.error("Update event error:", err);
+    return safeJson(res, 500, { message: "Update failed", error: err.message });
+  }
+});
+
+// Admin: Delete Event
+app.delete("/api/events/:id", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") return safeJson(res, 403, { message: "Only admins can delete events" });
+    await Event.findByIdAndDelete(req.params.id).exec();
+    return safeJson(res, 200, { message: "Event deleted" });
+  } catch (err) {
+    console.error("Delete event error:", err);
+    return safeJson(res, 500, { message: "Delete failed", error: err.message });
+  }
+});
+
+// All: Get events
+// All: Get events (with RSVP user info)
 app.get("/api/events", async (req, res) => {
   try {
-    const events = await Event.find();
-    res.status(200).json(events);
+    // Populate RSVPs with user name & email
+    const events = await Event.find()
+      .populate("rsvps", "name email role") // 👈 fetch these fields from User
+      .lean()
+      .exec();
+
+    return safeJson(res, 200, { events });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching events", error: err.message });
+    console.error("Get events error:", err);
+    return safeJson(res, 500, {
+      message: "Could not fetch events",
+      error: err.message,
+    });
   }
 });
 
-// Edit Event
-app.put("/api/events/:id", async (req, res) => {
+// Student: RSVP
+app.post("/api/events/:id/rsvp", auth, async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
-    const updated = await Event.findByIdAndUpdate(
-      req.params.id,
-      { title, description, date, location },
-      { new: true }
-    );
-    res.status(200).json({ message: "Event updated", event: updated });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating event", error: err.message });
-  }
-});
+    if (req.user.role !== "student") return safeJson(res, 403, { message: "Only students can RSVP" });
 
-// Delete Event
-app.delete("/api/events/:id", async (req, res) => {
-  try {
-    await Event.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Event deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting event", error: err.message });
-  }
-});
+    const event = await Event.findById(req.params.id).exec();
+    if (!event) return safeJson(res, 404, { message: "Event not found" });
 
-// =========================================
-// ===== RSVP SYSTEM (Tedla)
-// =========================================
+    if (event.rsvps.some((id) => id.toString() === req.user.id)) {
+      return safeJson(res, 400, { message: "Already RSVP’d" });
+    }
 
-// RSVP to an Event
-app.post("/api/events/:eventId/rsvp", async (req, res) => {
-  try {
-    const { userId } = req.body;
-    const event = await Event.findById(req.params.eventId);
-    const user = await User.findById(userId);
-
-    if (!event || !user)
-      return res.status(404).json({ message: "Event or User not found" });
-
-    if (event.rsvps.includes(userId))
-      return res.status(400).json({ message: "Already RSVP’d to this event" });
-
-    event.rsvps.push(userId);
-    user.events.push(event._id);
-
+    event.rsvps.push(req.user.id);
     await event.save();
-    await user.save();
-
-    res.status(200).json({ message: "RSVP successful" });
+    return safeJson(res, 200, { message: "RSVP successful", event });
   } catch (err) {
-    res.status(500).json({ message: "RSVP failed", error: err.message });
+    console.error("RSVP error:", err);
+    return safeJson(res, 500, { message: "RSVP failed", error: err.message });
   }
 });
 
-// Get RSVPs for an Event
-app.get("/api/events/:eventId/rsvps", async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.eventId).populate("rsvps", "name email");
-    if (!event) return res.status(404).json({ message: "Event not found" });
-    res.status(200).json({ rsvps: event.rsvps });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching RSVPs", error: err.message });
-  }
-});
+// ===== ROOT =====
+app.get("/", (req, res) => res.send("🚀 CampusConnect API Running"));
 
-// =========================================
-// ===== ROOT TEST
-// =========================================
-app.get("/", (req, res) => {
-  res.send("🚀 Unified Backend Running: Auth + Events + RSVP");
-});
-
-// ===== START SERVER =====
+// ===== START =====
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
