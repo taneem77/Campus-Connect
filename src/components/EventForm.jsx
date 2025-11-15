@@ -2,6 +2,22 @@ import React from "react";
 import { CalendarPlus, Edit } from "lucide-react";
 
 export default function EventForm({ editEvent, onChange, onSubmit }) {
+  // --- NEW: Handle tags as a string ---
+  const handleTagsChange = (e) => {
+    // Convert comma-separated string to an array
+    const tagsArray = e.target.value.split(",").map((tag) => tag.trim());
+    // Create a new event object for the onChange prop
+    onChange({
+      target: {
+        name: "tags",
+        value: tagsArray,
+      },
+    });
+  };
+
+  // Convert array back to string for the input
+  const tagsString = editEvent?.tags?.join(", ") || "";
+
   return (
     <div className="event-form fade-in">
       <h2 className="form-title">
@@ -41,6 +57,20 @@ export default function EventForm({ editEvent, onChange, onSubmit }) {
             required
           />
         </div>
+        
+        {/* --- [NEW] TAGS INPUT --- */}
+        <div className="form-group">
+          <label>Tags</label>
+          <input
+            type="text"
+            name="tags"
+            placeholder="e.g., hackathon, ai, tech, workshop"
+            value={tagsString}
+            onChange={handleTagsChange} // Use custom handler
+          />
+          <small>Use commas (,) to separate tags.</small>
+        </div>
+        {/* ----------------------- */}
 
         {/* ===== DATE + LOCATION ===== */}
         <div className="form-row">
@@ -59,7 +89,7 @@ export default function EventForm({ editEvent, onChange, onSubmit }) {
             <label>Location</label>
             <input
               type="text"
-              name="location"
+              name="location" // <-- Fixed: was 'venue' in your original file
               placeholder="Event location..."
               value={editEvent?.location || ""}
               onChange={onChange}

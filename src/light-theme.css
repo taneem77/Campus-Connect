@@ -1,0 +1,167 @@
+/* ================================
+   LIGHT THEME 
+   ================================ */
+
+/* * This class is added to the <body> tag by App.jsx
+ * All default (dark) styles are in App.css
+ * These rules override them when the .light class is present
+*/
+
+body.light {
+  --bg-dark: #f4f4f5; /* Light gray background */
+  --bg-gradient: linear-gradient(
+    to bottom right,
+    #ffffff,
+    #f8fafc
+  ); /* White gradient */
+  --card-bg: rgba(255, 255, 255, 1); /* White cards */
+  --primary: #7c3aed; /* Purple primary */
+  --accent: #0ea5e9; /* Sky blue accent */
+  --text: #1f2937; /* Dark gray text */
+  --muted: #6b7280; /* Medium gray text */
+
+  /* Redefine glows and borders for light mode */
+  --glow-purple: 0 0 15px rgba(168, 85, 247, 0.2);
+  --glow-cyan: 0 0 15px rgba(34, 211, 238, 0.2);
+  --border-color-light: rgba(0, 0, 0, 0.1);
+  --border-color-dark: rgba(0, 0, 0, 0.05);
+  --shadow-color: rgba(124, 58, 237, 0.1);
+  --shadow-color-hover: rgba(124, 58, 237, 0.2);
+}
+
+/* --- Body --- */
+body.light {
+  background: var(--bg-gradient);
+  color: var(--text);
+}
+
+/* --- Navbar --- */
+body.light .navbar {
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid var(--border-color-light);
+  box-shadow: 0 4px 20px var(--shadow-color);
+  color: var(--text);
+}
+body.light .navbar-links button {
+  color: var(--muted);
+}
+body.light .navbar-links button:hover {
+  color: var(--primary);
+}
+body.light .logout-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+}
+body.light .logout-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+body.light .user-info:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+
+/* --- Cards (Auth, Event, Profile, etc.) --- */
+body.light .card,
+body.light .event-card,
+body.light .event-form,
+body.light .profile-form-card,
+body.light .stat-card,
+body.light .mini-card,
+body.light .user-card,
+body.light .hero {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color-light);
+  box-shadow: 0 4px 20px var(--shadow-color);
+  color: var(--text);
+}
+
+body.light .card:hover,
+body.light .event-card:hover,
+body.light .stat-card:hover,
+body.light .mini-card:hover,
+body.light .user-card:hover {
+  box-shadow: 0 8px 30px var(--shadow-color-hover);
+}
+
+/* --- Forms & Inputs --- */
+body.light input,
+body.light textarea {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color-light);
+  color: var(--text);
+}
+body.light input:focus,
+body.light textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 12px var(--shadow-color);
+  background: var(--card-bg);
+}
+body.light textarea::placeholder,
+body.light input::placeholder {
+  color: var(--muted);
+}
+body.light .profile-pic-placeholder {
+  background: rgba(0, 0, 0, 0.02);
+  border: 3px dashed var(--border-color-light);
+  color: var(--muted);
+}
+
+/* --- Buttons --- */
+body.light .btn-outline {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+body.light .btn-outline:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+body.light .event-card .btn-outline {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+body.light .event-card .btn-outline:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* --- Text & Misc --- */
+body.light .event-card h3 {
+  color: var(--text);
+}
+body.light .event-card p,
+body.light .event-card p strong {
+  color: var(--muted);
+}
+body.light .form-group label {
+  color: var(--primary);
+}
+body.light .hero h1 {
+  color: var(--text);
+}
+body.light .hero p {
+  color: var(--muted);
+}
+body.light .section h2 {
+  color: var(--text);
+  border-bottom: 1px solid var(--border-color-light);
+}
+body.light .stat-card h3 {
+  color: var(--primary);
+}
+body.light .stat-card p {
+  color: var(--muted);
+}
+body.light .rsvp-dropdown {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color-light);
+}
+body.light .rsvp-list li {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text);
+}
+body.light ::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary), var(--accent));
+}
+body.light ::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
