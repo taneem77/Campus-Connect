@@ -25,19 +25,13 @@ Tools | Thunder Client, GitHub
 ## ✅ Project Status
 - Backend authentication ✅ *(tested using Thunder Client)*  
 - MongoDB connected ✅  
-- Frontend integration in progress 🚧  
+- Frontend integration ✅  
 
 ---
 
 ## 🧪 Backend API Testing (Thunder Client)
 Backend APIs were tested using **Thunder Client** in VS Code.
 
-### Tested Routes
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-POST | `/api/register` | Register new user  
-POST | `/api/login` | User login + JWT  
-GET | `/api/user` | Protected route — requires `x-auth-token` header  
 
 
 
